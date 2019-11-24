@@ -43,21 +43,6 @@ class condition extends \core_availability\condition {
     /** @var string used to indicate the condition is on the most recent complete attempt. */
     const ATTEMPT_MOST_RECENT_COMPLETE = 'mostrecentcomplete';
 
-    /** @var string used to indicate the designated question should be right. */
-    const QUESTION_RIGHT = 'right';
-
-    /** @var string used to indicate the designated question should be right. */
-    const QUESTION_PARTIAL = 'right';
-
-    /** @var string used to indicate the designated question should be right. */
-    const QUESTION_WRONG = 'right';
-
-    /** @var string used to indicate the designated question should be right. */
-    const QUESTION_NEEDSGRADING = 'right';
-
-    /** @var string used to indicate the designated question should be right. */
-    const QUESTION_COMPLETE = 'right';
-
     /** @var int Quiz id */
     private $quizid;
 
@@ -67,8 +52,8 @@ class condition extends \core_availability\condition {
     /** @var int Slot number of the question to consider in the quiz. */
     private $slot;
 
-    /** @var string Desired state. */
-    private
+    /** @var \question_state[] . */
+    private $allowedstates;
 
     /**
      * Constructor.
@@ -92,12 +77,22 @@ class condition extends \core_availability\condition {
             if (isset($structure->slot)) {
                 throw new \coding_exception('->slot should not be set if ->attempt == \'none\' for quizquestion condition');
             }
+            if (isset($structure->states)) {
+                throw new \coding_exception('->states should not be set if ->attempt == \'none\' for quizquestion condition');
+            }
         } else if ($structure->attempt === self::ATTEMPT_MOST_RECENT || $structure->attempt === self::ATTEMPT_MOST_RECENT_COMPLETE) {
             $this->whichattempt = $structure->attempt;
             if (isset($structure->slot) && is_int($structure->slot)) {
                 $this->slot = $structure->slot;
             } else {
                 throw new \coding_exception('Missing or invalid quiz ->slot for quizquestion condition');
+            }
+            if (!isset($structure->states) || !is_array($structure->states)) {
+                throw new \coding_exception('Missing or invalid quiz ->states for quizquestion condition');
+            }
+            $this->allowedstates = [];
+            foreach ($structure->states as $state) {
+                $this->allowedstates[] = \question_state::get($state);
             }
         } else {
             throw new \coding_exception('Invalid ->attempt for quizquestion condition');
@@ -108,6 +103,10 @@ class condition extends \core_availability\condition {
         $structure = (object) ['type' => 'quizquestion', 'id' => $this->quizid, 'attempt' => $this->whichattempt];
         if ($this->whichattempt !== self::ATTEMPT_NONE) {
             $structure->slot = $this->slot;
+            $structure->states = [];
+            foreach ($this->allowedstates as $state) {
+                $structure->states[] = '' . $state;
+            }
         }
         return $structure;
     }
@@ -121,12 +120,14 @@ class condition extends \core_availability\condition {
      * @param int $quizid Quiz id
      * @param string $whichattempt one of the ATTEMPT_ consts defined by this class.
      * @param int|null $slot slot number (if $whichattempt is not 'none').
+     * @param string[] $allowedstates which states allow access.
      * @return \stdClass Object representing condition
      */
-    public static function get_json($quizid, $whichattempt, $slot = null) {
-        $structure = (object) ['type' => 'quizquestion', 'id' => $quizid, 'attempt' => $whichattempt);
+    public static function get_json($quizid, $whichattempt, $slot = null, $allowedstates = []) {
+        $structure = (object) ['type' => 'quizquestion', 'id' => $quizid, 'attempt' => $whichattempt];
         if ($whichattempt !== self::ATTEMPT_NONE) {
             $structure->slot = $slot;
+            $structure->states = $allowedstates;
         }
         return $structure;
     }

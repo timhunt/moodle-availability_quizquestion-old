@@ -22,8 +22,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['description'] = 'Control access based on the state of one question in a particular quiz.';
-$string['error_selectquizid'] = 'You must select a grade item for the grade condition.';
+$string['description'] = 'Control access based on the state of a particular question in a quiz.';
+$string['error_selectquizid'] = 'You must select a quiz quiz question condition.';
 $string['label_min'] = 'Minimum grade percentage (inclusive)';
 $string['label_max'] = 'Maximum grade percentage (exclusive)';
 $string['pluginname'] = 'Restriction by outcome of question in quiz';

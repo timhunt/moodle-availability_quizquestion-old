@@ -27,3 +27,5 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2019112300;
 $plugin->requires = 2019052000;
 $plugin->component = 'availability_quizquestion';
+$plugin->maturity  = MATURITY_BETA;
+$plugin->release   = 'v0.1 for Moodle 3.7+';
